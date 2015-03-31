@@ -3,6 +3,7 @@ package com.gmail.at.ivanehreshi;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -14,6 +15,7 @@ public class WordFreqCounter {
 	private int nThreads;
 	private final String text;
 	private Set<String> dictionary = new HashSet<>();
+	private ArrayList queuedDictionary = new ArrayList<>();
 	private String[] words;
 
 	private ExecutorService pool;
@@ -27,12 +29,18 @@ public class WordFreqCounter {
 	}
 	
 	private void splitIntoWords(){
-		words = text.split(" ;\\?\n\\.\\!");
+		words = text.split("[ ;\\?\n\\.\\!\r]");
 	}
 	
 	private void addWordsToDict(){
-		for(int i = 0; i < words.length; i++)
-			dictionary.add(words[i]);
+		for(int i = 0; i < words.length; i++){
+			String word = words[i].toLowerCase();
+			if(!dictionary.contains(word) && word != ""){
+				dictionary.add(word); 
+				queuedDictionary.add(word);
+			}
+		}
+
 	}
 	
 	public void compute(){
@@ -49,6 +57,7 @@ public class WordFreqCounter {
 		}
 		
 		computed = true;
+		pool.shutdown();
 	}
 	
 	public int getFrequency(int i){
