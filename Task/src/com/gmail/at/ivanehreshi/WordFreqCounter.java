@@ -15,7 +15,10 @@ public class WordFreqCounter {
 	private int nThreads;
 	private final String text;
 	private Set<String> dictionary = new HashSet<>();
-	private ArrayList queuedDictionary = new ArrayList<>();
+	private ArrayList<String> queuedDictionary = new ArrayList<>();
+	
+
+
 	private String[] words;
 
 	private ExecutorService pool;
@@ -35,7 +38,7 @@ public class WordFreqCounter {
 	private void addWordsToDict(){
 		for(int i = 0; i < words.length; i++){
 			String word = words[i].toLowerCase();
-			if(!dictionary.contains(word) && word != ""){
+			if(!dictionary.contains(word) && !word.equals("")){
 				dictionary.add(word); 
 				queuedDictionary.add(word);
 			}
@@ -51,10 +54,12 @@ public class WordFreqCounter {
 		addWordsToDict();
 		
 		pool = Executors.newFixedThreadPool(nThreads);
-		for(String key: dictionary){
+		for(String key: queuedDictionary){
 			results.add(
 					pool.submit(new SingleWordCounter(key)));
 		}
+		
+		
 		
 		computed = true;
 		pool.shutdown();
@@ -69,10 +74,14 @@ public class WordFreqCounter {
 		return 0;
 	}
 
-	public String[] getWords() {
-		return words;
+	public ArrayList<String> getQueuedDictionary() {
+		return queuedDictionary;
 	}
-
+	
+	public String getDictionaryWord(int i){
+		return queuedDictionary.get(i);
+	}
+	
 	
 	private class SingleWordCounter implements Callable<Integer>{
 

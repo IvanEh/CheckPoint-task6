@@ -38,7 +38,7 @@ public class App implements Runnable {
 		
 		try {
 			Scanner fileScanner = new Scanner(new File(inputFilePath));
-			text = fileScanner.next("\\A");
+			text = fileScanner.useDelimiter("\\A").next();
 			fileScanner.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -53,8 +53,10 @@ public class App implements Runnable {
 			e.printStackTrace();
 		}
 		counter.compute();
-		for(int i = 0; i < counter.getWords().length; i++){
-			writer.println(counter.getWords()[i] + "\t" + counter.getFrequency(i));
+		int c = 0;
+		for(String word: counter.getQueuedDictionary()){
+			writer.println(word + "\t" + counter.getFrequency(c));
+			c++;
 		}
 		writer.close();
 	}
