@@ -16,6 +16,7 @@ public class WordFreqCounter {
 	private final String text;
 	private Set<String> dictionary = new HashSet<>();
 	private ArrayList<String> queuedDictionary = new ArrayList<>();
+	private ArrayList<Integer> firstOccurence = new ArrayList<>();
 	
 
 
@@ -32,7 +33,7 @@ public class WordFreqCounter {
 	}
 	
 	private void splitIntoWords(){
-		words = text.split("[ ;\\?\n\\.\\!\r]");
+		words = text.split("[ ,:;\\?\n\\.\\!\r]");
 	}
 	
 	private void addWordsToDict(){
@@ -41,6 +42,7 @@ public class WordFreqCounter {
 			if(!dictionary.contains(word) && !word.equals("")){
 				dictionary.add(word); 
 				queuedDictionary.add(word);
+				firstOccurence.add(i);
 			}
 		}
 
@@ -54,9 +56,9 @@ public class WordFreqCounter {
 		addWordsToDict();
 		
 		pool = Executors.newFixedThreadPool(nThreads);
-		for(String key: queuedDictionary){
+		for(int i = 0; i < queuedDictionary.size(); i++){
 			results.add(
-					pool.submit(new SingleWordCounter(key)));
+					pool.submit(new SingleWordCounter(i)));
 		}
 		
 		
@@ -85,18 +87,19 @@ public class WordFreqCounter {
 	
 	private class SingleWordCounter implements Callable<Integer>{
 
-		private String word;
+		private int ind;
 
-		public SingleWordCounter(String word) {
-			this.word = word;
+		public SingleWordCounter(int ind) {
+			this.ind = ind;
 		}
 
 		@Override
 		public Integer call() throws Exception {
 			int count = 0;
-			
-			for(String w: words){
-				if(w.equalsIgnoreCase(word))
+			String word = queuedDictionary.get(ind);
+			int start = firstOccurence.get(ind);
+			for(int i = start; i < words.length; i++){
+				if(words[i].equalsIgnoreCase(word))
 					count++;
 			}
 			
