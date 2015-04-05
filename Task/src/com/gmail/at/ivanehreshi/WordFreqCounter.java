@@ -2,6 +2,7 @@ package com.gmail.at.ivanehreshi;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.concurrent.Callable;
@@ -9,12 +10,18 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+import com.gmail.at.ivanehreshi.utils.MutableInteger;
 
 public class WordFreqCounter {
 	
 	private int nThreads;
 	private final String text;
-	private Set<String> dictionary = new HashSet<>();
+	private Hashtable<String, MutableInteger> dictionary = new Hashtable<>();
+
+
+
 	private ArrayList<String> queuedDictionary = new ArrayList<>();
 	private ArrayList<Integer> firstOccurence = new ArrayList<>();
 	
@@ -26,6 +33,8 @@ public class WordFreqCounter {
 	private final ArrayList<Future<Integer>> results;
 	private boolean computed = false;
 	
+	public enum CalcType {DividedSequence, SingleWord};
+	
 	public WordFreqCounter(String text, int nThreads){
 		this.text = text;
 		this.nThreads = nThreads;
@@ -33,14 +42,14 @@ public class WordFreqCounter {
 	}
 	
 	private void splitIntoWords(){
-		words = text.split("[ ,:;\\?\n\\.\\!\r]");
+		words = text.split("[ ,:;\\?\n\\.\\!\r]{1,}");
 	}
 	
 	private void addWordsToDict(){
 		for(int i = 0; i < words.length; i++){
 			String word = words[i].toLowerCase();
-			if(!dictionary.contains(word) && !word.equals("")){
-				dictionary.add(word); 
+			if(!dictionary.keySet().contains(word) && !word.equals("")){
+				dictionary.put(word, new MutableInteger(0)); 
 				queuedDictionary.add(word);
 				firstOccurence.add(i);
 			}
@@ -52,7 +61,7 @@ public class WordFreqCounter {
 		if(computed)
 			return;
 		
-		splitIntoWords();
+		splitIntoWords();		
 		addWordsToDict();
 		
 		pool = Executors.newFixedThreadPool(nThreads);
@@ -60,11 +69,11 @@ public class WordFreqCounter {
 			results.add(
 					pool.submit(new SingleWordCounter(i)));
 		}
-		
-		
-		
-		computed = true;
 		pool.shutdown();
+	
+	
+		computed = true;
+		
 	}
 	
 	public int getFrequency(int i){
@@ -84,6 +93,9 @@ public class WordFreqCounter {
 		return queuedDictionary.get(i);
 	}
 	
+	public Hashtable<String, MutableInteger> getDictionary() {
+		return dictionary;
+	}
 	
 	private class SingleWordCounter implements Callable<Integer>{
 
@@ -107,4 +119,5 @@ public class WordFreqCounter {
 		}
 	
 	}
+
 }

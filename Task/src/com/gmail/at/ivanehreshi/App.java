@@ -3,7 +3,10 @@ package com.gmail.at.ivanehreshi;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.LinkedList;
 import java.util.Scanner;
+
+import com.gmail.at.ivanehreshi.WordFreqCounter.CalcType;
 
 public class App implements Runnable {
 	
@@ -16,7 +19,7 @@ public class App implements Runnable {
 	private int nThreads;
 	
 	private App(){
-		
+		LinkedList<E>
 	}
 	
 	private void menu(){
@@ -58,6 +61,9 @@ public class App implements Runnable {
 			writer.println(word + "\t" + counter.getFrequency(c));
 			c++;
 		}
+	
+		
+		
 		writer.close();
 	}
 	 
